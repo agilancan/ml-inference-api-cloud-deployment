@@ -12,7 +12,7 @@ def features():
         "flipper_length_mm": 181.0,
         "body_mass_g": 3750.0,
         "year": 2007,
-        "sex": "male",
+        "sex": "Male",
         "island": "Dream",
     }
 
@@ -67,7 +67,7 @@ def test_predict_edge_large_values(features):
     features_large["flipper_length_mm"] = 1e6
     features_large["body_mass_g"] = 1e6
     features_large["year"] = 9999
-    features_large["sex"] = "female"
+    features_large["sex"] = "Female"
     features_large["island"] = "Biscoe"
     response = client.post("/predict", json=features_large)
     assert response.status_code == 200
@@ -76,7 +76,7 @@ def test_predict_edge_large_values(features):
 
 def test_predict_all_categorical_combinations(features):
     client = TestClient(app)
-    sexes = ["male", "female"]
+    sexes = ["Male", "Female"]
     islands = ["Biscoe", "Dream", "Torgersen"]
     for sex in sexes:
         for island in islands:
@@ -94,3 +94,34 @@ def test_predict_output_range(features):
     assert response.status_code == 200
     pred = response.json()["prediction"]
     assert pred in [0, 1, 2]
+
+
+def test_predict_endpoint_valid_input():
+    """Test prediction with valid penguin data"""
+    client = TestClient(app)
+    sample_data = {
+        "bill_length_mm": 39.1,
+        "bill_depth_mm": 18.7,
+        "flipper_length_mm": 181,
+        "body_mass_g": 3750,
+        "year": 2007,         
+        "sex": "Male",        
+        "island": "Dream"
+    }
+    response = client.post("/predict", json=sample_data)
+    assert response.status_code == 200
+    assert "prediction" in response.json()
+
+def test_predict_invalid_missing_bill_length(features):
+    client = TestClient(app)
+    invalid = features.copy()
+    invalid.pop("bill_length_mm")
+    response = client.post("/predict", json=invalid)
+    assert response.status_code == 422
+
+def test_predict_invalid_bill_length_type(features):
+    client = TestClient(app)
+    invalid = features.copy()
+    invalid["bill_length_mm"] = "not_a_float"
+    response = client.post("/predict", json=invalid)
+    assert response.status_code == 422

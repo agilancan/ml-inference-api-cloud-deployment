@@ -176,3 +176,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Ignore Google Cloud service account key
+sa-key.json
+
+.env

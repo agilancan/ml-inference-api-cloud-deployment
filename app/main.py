@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from enum import Enum
 import xgboost as xgb
 import pandas as pd
+from dotenv import load_dotenv
+from google.cloud import storage
+
+load_dotenv()
 
 # Logging config
 logging.basicConfig(
@@ -18,6 +22,10 @@ logger = logging.getLogger(__name__)
 # Path to saved model
 MODEL_FILE = os.path.join(os.path.dirname(__file__), "data", "model.json")
 
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+GCS_BLOB_NAME = os.getenv("GCS_BLOB_NAME")
+GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
 app = FastAPI()
 
 
@@ -27,8 +35,8 @@ class Island(str, Enum):
     Dream = "Dream"
 
 class Sex(str, Enum):
-    male = "male"
-    female = "female"
+    male = "Male"
+    female = "Female"
 
 
 class PenguinFeatures(BaseModel):
@@ -43,15 +51,40 @@ class PenguinFeatures(BaseModel):
 
 # Loading Model
 def load_model():
-    logging.info("Loading model from %s", MODEL_FILE)
+    """
+    Try to load model from GCS using service account.
+    If that fails (no creds/env/bucket), fall back to local file.
+    """
+    model = xgb.XGBClassifier()
+
+    # First, try GCS if env vars look present
+    can_try_gcs = all([GCS_BUCKET_NAME, GCS_BLOB_NAME, GOOGLE_APPLICATION_CREDENTIALS])
+    if can_try_gcs:
+        try:
+            logging.info("Attempting to load model from GCS: bucket=%s blob=%s",
+                         GCS_BUCKET_NAME, GCS_BLOB_NAME)
+            client = storage.Client.from_service_account_json(GOOGLE_APPLICATION_CREDENTIALS)
+            bucket = client.bucket(GCS_BUCKET_NAME)
+            blob = bucket.blob(GCS_BLOB_NAME)
+
+            # Download to memory, then load into XGBoost
+            model_json_bytes = blob.download_as_bytes()
+            model_json_str = model_json_bytes.decode("utf-8")
+            model.load_model(bytearray(model_json_str, "utf-8"))  # XGB can load JSON from bytes
+            logging.info("Model loaded from GCS successfully")
+            return model
+        except Exception as e:
+            logging.exception("Failed to load model from GCS, will fall back to local file. Reason: %s", e)
+
+    # Fallback: local file
     try:
-        model = xgb.XGBClassifier()
+        logging.info("Loading model from local file: %s", MODEL_FILE)
         model.load_model(MODEL_FILE)
-        logger.info("Model loaded successfully")
+        logging.info("Model loaded from local file successfully")
         return model
-    except Exception as e:
-        logger.exception("Failed to load model.")
-        raise e
+    except Exception:
+        logging.exception("Failed to load model from local file.")
+        raise
 
 
 model = load_model()
@@ -105,3 +138,9 @@ async def predict(features: PenguinFeatures):
     except Exception as e:
         logger.exception("Prediction failed.")
         raise HTTPException(status_code=500, detail="Prediction error")
+    
+
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8080, reload=True)
