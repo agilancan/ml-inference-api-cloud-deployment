@@ -1,5 +1,7 @@
 # PenguinML Ops: Build, Test, Deploy
 
+[![Watch the video](https://img.youtube.com/vi/PRLZrLmKjxE/maxresdefault.jpg)](https://youtu.be/PRLZrLmKjxE)
+
 ## Project Overview
 This project is a machine learning API that predicts the species of a penguin based on features like bill length, bill depth, flipper length, body mass, year, sex, and island.
 It uses FastAPI for the backend, runs inside Docker, and can be deployed to Google Cloud Run.
