@@ -98,3 +98,8 @@ Cloud Testing:
 - Normal (10 users, 5 min): Response time 83.7 ms, 0 failures, 3.2 RPS
 - Stress (50 users, 2 min): Response time 76.2 ms, 0 failures, 16.1 RPS
 - Spike (1 → 100 users, 1 min): Response time 75.3 ms, 0 failures, 28.2 RPS
+
+
+### 8. **Screenshots**
+<p align="center"><img src="ml-inference-api-cloud-deployment/1.PNG" width="600"/></p>
+<p align="center"><img src="ml-inference-api-cloud-deployment/total_requests_per_second_1756265479.508.PNG" width="600"/></p>
