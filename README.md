@@ -101,5 +101,5 @@ Cloud Testing:
 
 
 ### 8. **Screenshots**
-<p align="center"><img src="ml-inference-api-cloud-deployment/1.PNG" width="600"/></p>
-<p align="center"><img src="ml-inference-api-cloud-deployment/total_requests_per_second_1756265479.508.PNG" width="600"/></p>
+<p align="center"><img src="Locust-Downloaded-Reports/1.PNG" width="600"/></p>
+<p align="center"><img src="Locust-Downloaded-Reports/total_requests_per_second_1756265479.508.PNG" width="600"/></p>
