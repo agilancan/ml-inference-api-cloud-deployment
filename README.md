@@ -101,5 +101,5 @@ Cloud Testing:
 
 
 ### 8. **Screenshots**
-<p align="center"><img src="Locust-Downloaded-Reports/1.PNG" width="1000"/></p>
+<p align="center"><img src="Locust-Downloaded-Reports/1.PNG" width="1200"/></p>
 <p align="center"><img src="Locust-Downloaded-Reports/total_requests_per_second_1756265479.508.png" width="1000"/></p>
